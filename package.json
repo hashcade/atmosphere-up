@@ -1,7 +1,7 @@
 {
   "name": "atmosphere-up",
   "type": "module",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "packageManager": "pnpm@10.34.6",
   "description": "Automatic upgrade and integration of Atmosphère firmware.",
   "author": "jinghaihan",
