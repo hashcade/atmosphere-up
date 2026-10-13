@@ -1,11 +1,18 @@
 import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'pathe'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { getRepositoryFile } from '../../src/download'
 import { generateAmiibos, getAmiiboCatalog } from '../../src/extensions/amiibo-data'
 
 const marth = { name: 'Marth', amiiboSeries: 'Super Smash Bros.', head: '21000000', tail: '000b0002' }
 let directory: string | undefined
+
+vi.mock('../../src/download', () => ({ getRepositoryFile: vi.fn() }))
+
+beforeEach(() => {
+  vi.mocked(getRepositoryFile).mockReset()
+})
 
 afterEach(async () => {
   vi.unstubAllGlobals()
@@ -15,21 +22,27 @@ afterEach(async () => {
 })
 
 describe('getAmiiboCatalog', () => {
-  it('reads the same database as Emuiigen and passes cancellation to fetch', async () => {
-    const fetch = vi.fn().mockResolvedValue(Response.json({ amiibo: [marth] }))
-    vi.stubGlobal('fetch', fetch)
+  it('reads the API source database through GitHub and preserves series and IDs', async () => {
+    vi.mocked(getRepositoryFile).mockResolvedValue(JSON.stringify({
+      amiibos: {
+        '0x21000000000b0002': { name: 'Marth' },
+        '0x21080000035d1202': { name: 'Chrom' },
+      },
+      amiibo_series: { '0x00': 'Super Smash Bros.', '0x12': 'Fire Emblem' },
+    }))
     const controller = new AbortController()
 
-    expect(await getAmiiboCatalog(controller.signal)).toEqual([marth])
-    expect(fetch).toHaveBeenCalledWith('https://www.amiiboapi.org/api/amiibo/', { signal: expect.any(AbortSignal) })
-    controller.abort()
-    expect(fetch.mock.calls[0][1].signal.aborted).toBe(true)
+    expect(await getAmiiboCatalog(controller.signal)).toEqual([
+      marth,
+      { name: 'Chrom', amiiboSeries: 'Fire Emblem', head: '21080000', tail: '035d1202' },
+    ])
+    expect(getRepositoryFile).toHaveBeenCalledWith('8bitDream/AmiiboAPI', 'database/amiibo.json', controller.signal)
   })
 
-  it('reports HTTP failures instead of showing an empty series list', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 503 })))
+  it('reports download failures instead of showing an empty series list', async () => {
+    vi.mocked(getRepositoryFile).mockRejectedValue(new Error('API rate limit exceeded'))
 
-    await expect(getAmiiboCatalog()).rejects.toThrow('failed to load amiibo series: HTTP 503')
+    await expect(getAmiiboCatalog()).rejects.toThrow('API rate limit exceeded')
   })
 })
 

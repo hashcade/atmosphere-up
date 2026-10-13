@@ -1,6 +1,7 @@
 import type { Release, ReleaseAsset } from '../../src/types'
+import { Buffer } from 'node:buffer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { downloadAsset, getRelease } from '../../src/download'
+import { downloadAsset, getRelease, getRepositoryFile } from '../../src/download'
 import { resolveGithubToken } from '../../src/download/auth'
 import { selectAsset, sha256 } from '../../src/utils'
 
@@ -41,6 +42,29 @@ describe('getRelease', () => {
   it('reports an API failure', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ message: 'API rate limit exceeded' }, { status: 403 })))
     await expect(getRelease('example/core')).rejects.toThrow('API rate limit exceeded')
+  })
+})
+
+describe('getRepositoryFile', () => {
+  it('reads repository files through the shared client with cancellation', async () => {
+    const source = '{"amiibos":{}}'
+    const fetch = vi.fn().mockResolvedValue(Response.json({ type: 'file', encoding: 'base64', content: Buffer.from(source).toString('base64') }))
+    vi.stubGlobal('fetch', fetch)
+    const controller = new AbortController()
+
+    expect(await getRepositoryFile('8bitDream/AmiiboAPI', 'database/amiibo.json', controller.signal)).toBe(source)
+    expect(fetch.mock.calls[0][0]).toBe('https://api.github.com/repos/8bitDream/AmiiboAPI/contents/database%2Famiibo.json')
+    expect(fetch.mock.calls[0][1].signal).toBe(controller.signal)
+  })
+
+  it('rejects directories and cancelled requests', async () => {
+    const fetch = vi.fn().mockResolvedValue(Response.json([]))
+    vi.stubGlobal('fetch', fetch)
+
+    await expect(getRepositoryFile('example/core', 'directory')).rejects.toThrow('expected a file')
+    fetch.mockClear()
+    await expect(getRepositoryFile('example/core', 'file', AbortSignal.abort())).rejects.toThrow('aborted')
+    expect(fetch).not.toHaveBeenCalled()
   })
 })
 

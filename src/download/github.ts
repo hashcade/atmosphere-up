@@ -1,4 +1,5 @@
 import type { ReleaseAsset } from '../types'
+import { Buffer } from 'node:buffer'
 import { Octokit } from '@octokit/rest'
 import { sha256 } from '../utils'
 import { resolveGithubToken } from './auth'
@@ -8,6 +9,20 @@ let github: Promise<Octokit> | undefined
 interface DownloadOptions {
   signal?: AbortSignal
   onProgress?: (received: number) => void
+}
+
+export async function getRepositoryFile(repository: string, path: string, signal?: AbortSignal): Promise<string> {
+  signal?.throwIfAborted()
+  const github = await getGithub()
+  signal?.throwIfAborted()
+
+  const [owner, repo] = repository.split('/')
+  const { data } = await github.rest.repos.getContent({ owner, repo, path, request: { signal } })
+
+  if (Array.isArray(data) || data.type !== 'file' || data.encoding !== 'base64')
+    throw new Error(`expected a file: ${repository}/${path}`)
+
+  return Buffer.from(data.content, 'base64').toString('utf8')
 }
 
 export async function getRelease(repository: string, tag?: string, signal?: AbortSignal) {

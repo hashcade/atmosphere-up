@@ -91,6 +91,8 @@ version. Use pnpm and follow the installed dependencies and existing modules.
   preselected and an empty selection allowed. Generate Emuiibo-format directories
   under `emuiibo/amiibo`; include IDs in directory names to preserve same-name
   variants. Keep UUID randomization off by default, as in Emuiigen.
+  Read the live database from `8bitDream/AmiiboAPI/database/amiibo.json` using
+  the shared GitHub client; its `amiibo_series` table matches API categories.
 - Keep overlay memory at 8 MiB and the hotkey at L + D-pad Down. Cheats default
   off without remembered toggles. When cheat tools are selected, offer two
   independent confirmations for enabling cheats by default and remembering

@@ -3,6 +3,7 @@ import { Buffer } from 'node:buffer'
 import { randomBytes } from 'node:crypto'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'pathe'
+import { getRepositoryFile } from '../download'
 
 export interface AmiiboEntry {
   name: string
@@ -12,15 +13,18 @@ export interface AmiiboEntry {
 }
 
 export async function getAmiiboCatalog(signal?: AbortSignal): Promise<AmiiboEntry[]> {
-  const response = await fetch('https://www.amiiboapi.org/api/amiibo/', {
-    signal: AbortSignal.any([AbortSignal.timeout(30_000), ...signal ? [signal] : []]),
-  })
+  const source = await getRepositoryFile('8bitDream/AmiiboAPI', 'database/amiibo.json', signal)
+  const data = JSON.parse(source) as {
+    amiibos: Record<string, { name: string }>
+    amiibo_series: Record<string, string>
+  }
 
-  if (!response.ok)
-    throw new Error(`failed to load amiibo series: HTTP ${response.status}`)
-
-  const data = await response.json() as { amiibo: AmiiboEntry[] }
-  return data.amiibo
+  return Object.entries(data.amiibos).map(([id, entry]) => ({
+    name: entry.name,
+    amiiboSeries: data.amiibo_series[`0x${id.slice(14, 16)}`],
+    head: id.slice(2, 10),
+    tail: id.slice(10),
+  }))
 }
 
 function directoryName(name: string): string {
