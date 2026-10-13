@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'pathe'
 import tildify from 'tildify'
 import { isParentDirectory } from '../utils'
 import { compressArchive } from './archive'
+import { configureOverlayOrder } from './overlays'
 
 export function inspectOutput(directory: string, cwd: string): boolean {
   if (isParentDirectory(resolve(directory), resolve(cwd)))
@@ -31,6 +32,10 @@ export async function writeOutput({ directory, replace = false, populate, pack =
   try {
     await mkdir(staging)
     await populate(staging)
+
+    signal?.throwIfAborted()
+    onProgress?.('setting overlay order')
+    await configureOverlayOrder(staging)
 
     signal?.throwIfAborted()
     if (extra) {

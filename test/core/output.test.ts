@@ -66,6 +66,8 @@ describe('writeOutput', () => {
     await mkdir(join(extra, 'atmosphere/contents/game/cheats'), { recursive: true })
     const settings = JSON.stringify({ ExportToZip: 1 })
     await writeFile(join(extra, 'config/JKSV/JKSV.json'), settings)
+    await mkdir(join(extra, 'config/ultrahand'), { recursive: true })
+    await writeFile(join(extra, 'config/ultrahand/overlays.ini'), '[ovlEdiZon.ovl]\npriority=8\n')
     await writeFile(join(extra, 'switch/.overlays/personal.ovl'), 'personal overlay')
     await writeFile(join(extra, 'atmosphere/contents/game/cheats/build.txt'), 'personal cheat')
     await writeFile(join(extra, 'atmosphere/contents/game/cheats/toggles.txt'), 'personal toggles')
@@ -77,11 +79,13 @@ describe('writeOutput', () => {
       await writeFile(join(staging, 'config/JKSV/JKSV.json'), JSON.stringify({ ExportToZip: 0, HoldForDeletion: 0 }))
       await writeFile(join(staging, 'config/JKSV/keep.txt'), 'keep')
       await writeFile(join(staging, 'switch/.overlays/ovlmenu.ovl'), 'core overlay')
+      await writeFile(join(staging, 'switch/.overlays/ovlEdiZon.ovl'), 'cheat overlay')
     } })
 
     const expected = {
       'config/JKSV/JKSV.json': settings,
       'config/JKSV/keep.txt': 'keep',
+      'config/ultrahand/overlays.ini': '[ovlEdiZon.ovl]\npriority=8\n',
       'switch/.overlays/ovlmenu.ovl': 'core overlay',
       'switch/.overlays/personal.ovl': 'personal overlay',
       'atmosphere/contents/game/cheats/build.txt': 'personal cheat',
@@ -129,5 +133,20 @@ describe('writeOutput', () => {
     expect(await readFile(join(directory, 'original'), 'utf8')).toBe('keep')
     expect(await readFile(join(extra, 'extra.txt'), 'utf8')).toBe('personal file')
     expect(await glob('.atmosphere-up-*', { cwd: fixture, onlyDirectories: true, dot: true })).toEqual([])
+  })
+
+  it.each([false, true])('orders only installed built-in overlays with consecutive priorities and pack=%s', async (pack) => {
+    const destination = `${directory}${pack ? '.zip' : ''}`
+
+    await writeOutput({ directory: destination, pack, populate: async (staging) => {
+      await mkdir(join(staging, 'switch/.overlays'), { recursive: true })
+      for (const filename of ['sys-patch-overlay.ovl', 'ovlEdiZon.ovl', 'breezehand.ovl', 'Status-Monitor-Deux.ovl', 'ovlmenu.ovl', 'mhgu-overlay.ovl', 'feth-overlay.ovl'])
+        await writeFile(join(staging, 'switch/.overlays', filename), 'overlay')
+    } })
+
+    const path = 'config/ultrahand/overlays.ini'
+    const content = pack ? new AdmZip(destination).readAsText(path) : await readFile(join(destination, path), 'utf8')
+
+    expect(content).toBe('[ovlEdiZon.ovl]\npriority=1\n\n[breezehand.ovl]\npriority=2\n\n[Status-Monitor-Deux.ovl]\npriority=3\n\n[sys-patch-overlay.ovl]\npriority=4\n')
   })
 })

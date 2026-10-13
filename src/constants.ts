@@ -67,3 +67,18 @@ export const EXTENSION_REPO_CONFIG = {
 } as const
 
 export const PACK_DEFAULTS = new URL('../assets/defaults/', import.meta.url)
+
+export const OVERLAY_ORDER = [
+  'ovlEdiZon.ovl',
+  'breezehand.ovl',
+  'ReverseNX-RT-ovl.ovl',
+  'sys-clk-overlay.ovl',
+  'FPSLocker.ovl',
+  'Status-Monitor-Overlay.ovl',
+  'Status-Monitor-Deux.ovl',
+  'Fizeau.ovl',
+  'emuiibo.ovl',
+  'ovlSysmodules.ovl',
+  'horizon-oc-overlay.ovl',
+  'sys-patch-overlay.ovl',
+]
