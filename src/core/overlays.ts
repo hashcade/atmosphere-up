@@ -11,7 +11,7 @@ export async function configureOverlayOrder(directory: string): Promise<void> {
   if (!overlays.length)
     return
 
-  const content = overlays.map((filename, index) => stringify({ priority: index + 1 }, { section: filename })).join('\n')
+  const content = overlays.map((filename, index) => stringify({ priority: index + 1 }, { section: filename, platform: 'linux' })).join('\n')
   const path = join(directory, 'config/ultrahand/overlays.ini')
 
   await mkdir(dirname(path), { recursive: true })
