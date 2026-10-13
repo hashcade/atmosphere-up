@@ -6,13 +6,13 @@
   "description": "Automatic upgrade and integration of Atmosphère firmware.",
   "author": "jinghaihan",
   "license": "MIT",
-  "homepage": "https://github.com/jinghaihan/atmosphere-up#readme",
+  "homepage": "https://github.com/hashcade/atmosphere-up#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jinghaihan/atmosphere-up.git"
+    "url": "git+https://github.com/hashcade/atmosphere-up.git"
   },
   "bugs": {
-    "url": "https://github.com/jinghaihan/atmosphere-up/issues"
+    "url": "https://github.com/hashcade/atmosphere-up/issues"
   },
   "keywords": [
     "nintendo-switch",
