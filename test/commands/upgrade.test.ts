@@ -3,17 +3,20 @@ import * as p from '@clack/prompts'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { runUpgradeCommand } from '../../src/commands'
 import { getBundles, inspectOutput } from '../../src/core'
+import { getAmiiboCatalog } from '../../src/extensions/amiibo-data'
 import { buildUpgradePack, MODULE_GROUPS, resolveUpgradeResources } from '../../src/upgrade'
 
 vi.mock('@clack/prompts', async original => ({
   ...await original<typeof import('@clack/prompts')>(),
   groupMultiselect: vi.fn(),
+  multiselect: vi.fn(),
   select: vi.fn(),
   confirm: vi.fn(),
   cancel: vi.fn(),
   outro: vi.fn(),
   spinner: vi.fn(() => ({ start: vi.fn(), message: vi.fn(), stop: vi.fn(), error: vi.fn() })),
 }))
+vi.mock('../../src/extensions/amiibo-data', () => ({ getAmiiboCatalog: vi.fn() }))
 vi.mock('../../src/core', async original => ({
   ...await original<typeof import('../../src/core')>(),
   inspectOutput: vi.fn(),
@@ -30,6 +33,7 @@ const bundle = getBundles().find(bundle => bundle.labels.hos === '22.5.0')!
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(p.groupMultiselect).mockReset().mockResolvedValue(['dbi'])
+  vi.mocked(p.multiselect).mockReset().mockResolvedValue([])
   vi.mocked(p.select).mockReset().mockResolvedValue(bundle)
   vi.mocked(p.confirm).mockReset().mockResolvedValue(false)
   vi.mocked(inspectOutput).mockReturnValue(false)
@@ -39,6 +43,19 @@ beforeEach(() => {
 })
 
 describe('runUpgradeCommand', () => {
+  it('collects amiibo series for Emuiibo upgrades before resolving resources', async () => {
+    const amiibo = { name: 'Chrom', amiiboSeries: 'Fire Emblem', head: '21080000', tail: '035d1202' }
+    vi.mocked(getAmiiboCatalog).mockResolvedValue([amiibo])
+    vi.mocked(p.groupMultiselect).mockResolvedValue(['emuiibo'])
+    vi.mocked(p.multiselect).mockResolvedValue(['Fire Emblem'])
+
+    await runUpgradeCommand(config)
+
+    expect(p.multiselect).toHaveBeenCalledWith(expect.objectContaining({ message: 'select amiibo series (optional)', required: false }))
+    expect(resolveUpgradeResources).toHaveBeenCalledWith(['emuiibo'], expect.objectContaining({ amiibos: [amiibo] }))
+    expect(p.select).not.toHaveBeenCalled()
+  })
+
   it('lists and preselects configured modules without requiring HOS', async () => {
     const extensions = [
       { name: 'mhgu-overlay', repository: 'jinghaihan/mhgu-overlay', assets: [{ name: 'mhgu-overlay.ovl', target: 'switch/.overlays/mhgu-overlay.ovl' }] },

@@ -85,7 +85,7 @@ Choose optional modules by category, or use `--no-ext` to skip built-in optional
 | Sys Con | [o0Zz/sys-con](https://github.com/o0Zz/sys-con) | Third-party USB controller support; selected by default when controller support is enabled |
 | Moonlight Switch | [XITRIX/Moonlight-Switch](https://github.com/XITRIX/Moonlight-Switch) | Stream PC games to Switch; selected by default when streaming is enabled |
 | SysDVR | [exelix11/SysDVR](https://github.com/exelix11/SysDVR) | Stream Switch gameplay to a PC over USB or network, with a settings app; selected by default when streaming is enabled |
-| Emuiibo | [XorTroll/emuiibo](https://github.com/XorTroll/emuiibo) | Virtual Amiibo emulation with a background service and in-game overlay |
+| Emuiibo | [XorTroll/emuiibo](https://github.com/XorTroll/emuiibo) | Virtual Amiibo emulation with a background service and in-game overlay; generate Amiibo collections by series |
 
 All performance tuning tools except Horizon OC and Fizeau are selected by default. Selecting the
 Ultrahand clock overlay also includes a clock service. FPS Locker, ReverseNx RT,

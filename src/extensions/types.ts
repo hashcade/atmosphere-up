@@ -1,11 +1,13 @@
 import type { Resource } from '../core/plan'
 import type { TaskOptions } from '../types'
+import type { AmiiboEntry } from './amiibo-data'
 import type { CheatSettings } from './cheats'
 
 export interface ExtensionContext extends TaskOptions {
   hos?: string
   resources?: Resource[]
   cheats?: CheatSettings
+  amiibos?: AmiiboEntry[]
 }
 
 export interface Extension<T extends string> {

@@ -31,6 +31,9 @@ vi.mock('../../src/extensions/amiibo', async original => ({
   ...await original<typeof import('../../src/extensions/amiibo')>(),
   resolveAmiibo: vi.fn(),
 }))
+vi.mock('../../src/extensions/amiibo-data', () => ({
+  getAmiiboCatalog: vi.fn(async () => [{ name: 'Chrom', amiiboSeries: 'Fire Emblem', head: '21080000', tail: '035d1202' }]),
+}))
 vi.mock('../../src/extensions/controller-support', async original => ({
   ...await original<typeof import('../../src/extensions/controller-support')>(),
   resolveControllerSupport: vi.fn(),
@@ -267,6 +270,7 @@ describe('runCommand', () => {
       'select controller tools',
       'select streaming tools',
       'select amiibo tool',
+      'select amiibo series (optional)',
     ])
     expect(p.multiselect).toHaveBeenCalledWith(expect.objectContaining({
       initialValues: ['edizon-overlay'],

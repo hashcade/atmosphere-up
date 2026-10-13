@@ -1,7 +1,7 @@
 import type { Resource } from '../core/plan'
 import type { Extension, ExtensionContext } from './types'
 import * as p from '@clack/prompts'
-import { AMIIBO_OPTIONS, promptAmiibo, resolveAmiibo } from './amiibo'
+import { AMIIBO_OPTIONS, promptAmiibo, promptAmiiboSettings, resolveAmiibo } from './amiibo'
 import { CHEAT_OPTIONS, promptCheats, promptCheatSettings, resolveCheats } from './cheats'
 import { CONTROLLER_SUPPORT_OPTIONS, promptControllerSupport, resolveControllerSupport } from './controller-support'
 import { FILE_MANAGEMENT_OPTIONS, promptFileManagement, resolveFileManagement } from './file-management'
@@ -104,6 +104,7 @@ const extensions = [
     options: AMIIBO_OPTIONS,
     label: 'Amiibo',
     prompt: promptAmiibo,
+    promptSettings: promptAmiiboSettings,
     resolve: resolveAmiibo,
   }),
 ]

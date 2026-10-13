@@ -86,6 +86,11 @@ version. Use pnpm and follow the installed dependencies and existing modules.
   source or merging configuration fields. Do not filter cheat toggle files.
 - Keep shared optional module dependencies deduplicated. An enhanced Sys Clk overlay
   replaces the original overlay while preserving the required service/manager.
+- Emuiibo offers optional virtual Amiibo generation in builds and upgrades. Use
+  AmiiboAPI's `amiiboSeries` categories, sorted alphabetically, with nothing
+  preselected and an empty selection allowed. Generate Emuiibo-format directories
+  under `emuiibo/amiibo`; include IDs in directory names to preserve same-name
+  variants. Keep UUID randomization off by default, as in Emuiigen.
 - Keep overlay memory at 8 MiB and the hotkey at L + D-pad Down. Cheats default
   off without remembered toggles. When cheat tools are selected, offer two
   independent confirmations for enabling cheats by default and remembering
