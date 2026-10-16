@@ -171,11 +171,6 @@ export default defineConfig({
         },
       ],
     },
-    {
-      name: 'feth-overlays',
-      repository: '3096/feth-overlays',
-      assets: [{ name: 'feth-overlays.zip' }],
-    },
   ],
 })
 ```
